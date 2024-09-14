@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-full flex flex-col">
     <div class="bg-image fixed inset-0 bg-cover bg-center bg-no-repeat -z-1"></div>
-    <div class="grow pt-24">
+    <div class="grow pt-20">
       <div class="mb-6 flex flex-col items-center justify-center">
         <img :src="config.logo" alt="logo" class="h-14 w-auto" />
         <div class="mt-6 text-4xl text-white font-bold">{{ config.title }}</div>

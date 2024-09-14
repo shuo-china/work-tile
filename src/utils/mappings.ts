@@ -73,7 +73,7 @@ export const taskTypeMappings: Mappings<TaskTypeMappingValue> = {
   1: {
     text: '任务',
     color: Color.SUCCESS,
-    icon: 'success-filled'
+    icon: 'management'
   },
   2: {
     text: '事务',
@@ -94,5 +94,29 @@ export const taskTypeMappings: Mappings<TaskTypeMappingValue> = {
     text: '其它',
     color: Color.INFO,
     icon: 'more-filled'
+  }
+}
+
+export type WorkloadMappingValue = {
+  text: string
+  color: Color
+}
+
+export const workloadTypeMappings: Mappings<WorkloadMappingValue> = {
+  1: {
+    text: '设计',
+    color: Color.SUCCESS
+  },
+  2: {
+    text: '开发',
+    color: Color.PRIMARY
+  },
+  3: {
+    text: '缺陷',
+    color: Color.DANGER
+  },
+  4: {
+    text: '测试',
+    color: Color.WARNING
   }
 }

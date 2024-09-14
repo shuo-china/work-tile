@@ -7,9 +7,9 @@
     :show-arrow="false"
     :hide-after="0"
     :virtual-triggering="true"
-    :shortcuts="shortcuts"
     value-format="YYYY-MM-DD"
     popper-class="date-picker-popper"
+    @hide="handleHide"
     @update:visible="handleUpdateVisible"
     @update:model-value="handleUpdateModelValue"
   />
@@ -17,24 +17,8 @@
 
 <script setup lang="ts">
 import { UPDATE_MODEL_EVENT } from '@/utils/constants'
-import dayjs from 'dayjs'
 
-const shortcuts = [
-  {
-    text: '今天',
-    value: new Date()
-  },
-  {
-    text: '明天',
-    value: () => dayjs().add(1, 'day')
-  },
-  {
-    text: '下周',
-    value: () => dayjs().day(8)
-  }
-]
-
-const emit = defineEmits([UPDATE_MODEL_EVENT, 'update:disappear'])
+const emit = defineEmits([UPDATE_MODEL_EVENT, 'update:disappear', 'hide'])
 
 const visible = ref(false)
 
@@ -45,7 +29,15 @@ const handleUpdateModelValue = (v: string) => {
 
 const handleUpdateVisible = (v: boolean) => {
   visible.value = v
-  emit('update:disappear', !v)
+
+  if (v) {
+    emit('update:disappear', false)
+  }
+}
+
+const handleHide = () => {
+  emit('hide')
+  emit('update:disappear', true)
 }
 </script>
 

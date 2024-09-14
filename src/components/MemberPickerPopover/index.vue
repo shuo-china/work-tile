@@ -79,12 +79,14 @@ const handleAfterLeave = () => {
 }
 
 const handleClickMemeber = (member: MemberItem) => {
-  popoverRef.value?.getInstance()?.hide()
+  if (props.single) {
+    popoverRef.value?.getInstance()?.hide()
+  }
 
   if (!modelValue.value || props.single) {
     modelValue.value = [member]
   } else {
-    const v = { ...modelValue.value }
+    const v = [...modelValue.value]
     const index = v.findIndex(i => i.id === member.id)
 
     if (index !== -1) {

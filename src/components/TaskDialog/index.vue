@@ -1,15 +1,18 @@
 <template>
   <el-dialog
-    width="90%"
-    :model-value="visible"
+    v-model="visible"
+    :width="900"
+    align-center
+    class="task-dialog h-[90%] flex flex-col p-5!"
     :show-close="false"
-    @update:model-value="handleUpdateModelValue"
-    @click.stop.prevent
+    :destroy-on-close="true"
+    @close="taskIdModel = undefined"
+    @closed="handleClosed"
   >
     <template #header="{ close }">
       <div class="flex justify-between">
         <div class="flex items-center">
-          <div class="flex items-center rounded bg-black/5 px-3 py-1 text-xs">
+          <div class="flex cursor-pointer items-center rounded bg-black/5 px-3 py-1 text-xs">
             <el-icon
               :size="14"
               :style="{
@@ -34,7 +37,7 @@
       </div>
     </template>
 
-    <div v-if="data" class="flex flex-col">
+    <div v-if="data" class="h-full flex flex-col">
       <!-- 标题 -->
       <el-input
         v-model="data.task_name"
@@ -62,7 +65,7 @@
         </TaskStatusPopover>
         <!-- 负责人 -->
         <MemberPickerPopover
-          :model-value="[data.manager]"
+          :model-value="data.manager ? [data.manager] : []"
           @update:model-value="handleUpdateManager"
         >
           <div class="group flex flex-1 cursor-pointer items-center">
@@ -81,6 +84,12 @@
               <div class="ml-2">
                 <div>{{ data.manager.name }}</div>
                 <div class="mt-1 text-xs text-black/50">负责人</div>
+              </div>
+              <div
+                class="hidden pl-5 text-black/20 group-hover:block hover:text-[var(--el-color-danger)]"
+                @click.stop="handleClearManager"
+              >
+                <el-icon><Close /></el-icon>
               </div>
             </template>
           </div>
@@ -110,6 +119,12 @@
                 <div>{{ data.start_time }}</div>
                 <div class="mt-1 text-xs text-black/50">开始时间</div>
               </div>
+              <div
+                class="hidden pl-5 text-black/20 group-hover:block hover:text-[var(--el-color-danger)]"
+                @click.stop="handleClearStartTime"
+              >
+                <el-icon><Close /></el-icon>
+              </div>
             </template>
           </div>
         </div>
@@ -138,6 +153,12 @@
                 <div>{{ data.end_time }}</div>
                 <div class="mt-1 text-xs text-black/50">截止时间</div>
               </div>
+              <div
+                class="hidden pl-5 text-black/20 group-hover:block hover:text-[var(--el-color-danger)]"
+                @click.stop="handleClearEndTime"
+              >
+                <el-icon><Close /></el-icon>
+              </div>
             </template>
           </div>
         </div>
@@ -165,9 +186,13 @@
         </el-tab-pane>
       </el-tabs>
 
-      <TaskInfo v-if="tabName === 'task_info'" />
-      <Workload v-if="tabName === 'workload'" />
-      <Files v-if="tabName === 'files'" />
+      <TaskInfo
+        v-if="tabName === 'task_info'"
+        v-model="data"
+        @update-data="(...args) => emit('update-data', ...args)"
+      />
+      <Workload v-if="tabName === 'workload'" v-model="data" />
+      <Files v-if="tabName === 'files'" v-model="data" />
 
       <DatePickerPopover
         :model-value="data.start_time"
@@ -180,8 +205,14 @@
         @update:model-value="handleUpdateStartTime"
       />
       <DatePickerPopover
+        :shortcuts="shortcuts"
         :model-value="data.end_time"
         :virtual-ref="endTimeRef"
+        :disabled-date="
+          (time: Date) => {
+            return dayjs(time).isBefore(data?.start_time)
+          }
+        "
         @update:model-value="handleUpdateEndTime"
       />
     </div>
@@ -198,6 +229,21 @@ import Workload from './Workload.vue'
 import Files from './Files.vue'
 import dayjs from 'dayjs'
 
+const shortcuts = [
+  {
+    text: '今天',
+    value: new Date()
+  },
+  {
+    text: '明天',
+    value: () => dayjs().add(1, 'day')
+  },
+  {
+    text: '下周',
+    value: () => dayjs().day(8)
+  }
+]
+
 type TabName = 'task_info' | 'workload' | 'files'
 const tabName = ref<TabName>('task_info')
 
@@ -209,13 +255,6 @@ const taskIdModel = defineModel<number>('taskId')
 const emit = defineEmits(['update-data'])
 
 const visible = ref(!!taskIdModel.value)
-
-const handleUpdateModelValue = (val: boolean) => {
-  visible.value = val
-  if (!val) {
-    taskIdModel.value = undefined
-  }
-}
 
 const handleTitleInputEnter = (e: KeyboardEvent) => {
   const target = e.target as HTMLInputElement
@@ -277,6 +316,25 @@ const handleUpdateManager = (managers: MemberItem[]) => {
   }
 }
 
+const handleClearManager = () => {
+  const v = data.value
+
+  if (v) {
+    v.manager_id = 0
+    v.manager = null
+
+    updateTaskApi({
+      id: v.id,
+      manager_id: 0
+    })
+
+    emit('update-data', {
+      manager: null,
+      manager_id: undefined
+    })
+  }
+}
+
 const handleUpdateStartTime = (startTime: string) => {
   const v = data.value
 
@@ -290,6 +348,23 @@ const handleUpdateStartTime = (startTime: string) => {
 
     emit('update-data', {
       start_time: startTime
+    })
+  }
+}
+
+const handleClearStartTime = () => {
+  const v = data.value
+
+  if (v) {
+    v.start_time = ''
+
+    updateTaskApi({
+      id: v.id,
+      start_time: 0
+    })
+
+    emit('update-data', {
+      start_time: ''
     })
   }
 }
@@ -311,6 +386,28 @@ const handleUpdateEndTime = (endTime: string) => {
   }
 }
 
+const handleClearEndTime = () => {
+  const v = data.value
+
+  if (v) {
+    v.end_time = ''
+
+    updateTaskApi({
+      id: v.id,
+      end_time: 0
+    })
+
+    emit('update-data', {
+      end_time: ''
+    })
+  }
+}
+
+const handleClosed = () => {
+  tabName.value = 'task_info'
+  data.value = null
+}
+
 const data = ref<Nullable<TaskItem>>(null)
 const { runAsync } = useRequest(getTaskDetailApi, {
   manual: true
@@ -324,15 +421,18 @@ const taskStatus = computed(() =>
   data.value?.current_status ? taskStatusMappings[data.value.current_status] : null
 )
 
-watch(taskIdModel, newVal => {
-  visible.value = !!newVal
-  if (newVal) {
-    runAsync(newVal).then(res => (data.value = res))
-    console.log('请求数据')
-  } else {
-    console.log('clear')
+watch(
+  taskIdModel,
+  newVal => {
+    visible.value = !!newVal
+    if (newVal) {
+      runAsync(newVal).then(res => (data.value = res))
+    }
+  },
+  {
+    immediate: true
   }
-})
+)
 </script>
 
 <style lang="scss" scoped>
@@ -360,5 +460,15 @@ watch(taskIdModel, newVal => {
 
 :deep(.el-tabs__item.is-top) {
   width: 100px !important;
+}
+
+:global(.task-dialog > .el-dialog__header) {
+  z-index: 9;
+  background: white;
+}
+
+:global(.task-dialog > .el-dialog__body) {
+  flex-grow: 1;
+  overflow-y: auto;
 }
 </style>

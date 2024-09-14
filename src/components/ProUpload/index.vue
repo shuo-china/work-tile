@@ -1,39 +1,37 @@
 <template>
-  <div class="w-full">
-    <el-upload
-      ref="uploadRef"
-      :multiple="multiple"
-      :file-list="fileList"
-      :action="finallyConfig.apiURL"
-      :before-upload="handleBeforeUpload"
-      v-bind="finallyAttrs"
-      @update:file-list="handleUpdateFileList"
-      @success="handleUploadSuccess"
-      @error="handleUploadError"
-      @exceed="handleExceed"
-      @remove="handleRemove"
-      @preview="handlePicPreview"
-    >
-      <template v-for="(_, name) in omit($slots, ['default', 'tip'])" #[name]="slotData">
-        <slot :name="name" v-bind="slotData || {}"></slot>
-      </template>
-      <template #default>
-        <slot name="default">
-          <el-button type="primary">上传</el-button>
-        </slot>
-      </template>
-      <template #tip>
-        <slot name="tip">
-          <div v-if="limitExtTip" class="mt-1.5 text-xs text-black/70">{{ limitExtTip }}</div>
-          <div v-if="limitSizeTip" class="mt-1.5 text-xs text-black/70">{{ limitSizeTip }}</div>
-        </slot>
-      </template>
-    </el-upload>
+  <el-upload
+    ref="uploadRef"
+    :multiple="multiple"
+    :file-list="fileList"
+    :action="finallyConfig.apiURL"
+    :before-upload="handleBeforeUpload"
+    v-bind="finallyAttrs"
+    @update:file-list="handleUpdateFileList"
+    @success="handleUploadSuccess"
+    @error="handleUploadError"
+    @exceed="handleExceed"
+    @remove="handleRemove"
+    @preview="handlePicPreview"
+  >
+    <template v-for="(_, name) in omit($slots, ['default', 'tip'])" #[name]="slotData">
+      <slot :name="name" v-bind="slotData || {}"></slot>
+    </template>
+    <template #default>
+      <slot name="default">
+        <el-button type="primary">上传</el-button>
+      </slot>
+    </template>
+    <template v-if="showTip" #tip>
+      <slot name="tip">
+        <div v-if="limitExtTip" class="mt-1.5 text-xs text-black/70">{{ limitExtTip }}</div>
+        <div v-if="limitSizeTip" class="mt-1.5 text-xs text-black/70">{{ limitSizeTip }}</div>
+      </slot>
+    </template>
+  </el-upload>
 
-    <el-dialog v-model="dialogVisible">
-      <img class="w-full" :src="dialogImageUrl" />
-    </el-dialog>
-  </div>
+  <el-dialog v-model="dialogVisible">
+    <img class="w-full" :src="dialogImageUrl" />
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -48,7 +46,7 @@ defineOptions({
   inheritAttrs: false
 })
 
-const emit = defineEmits([UPDATE_MODEL_EVENT, UPDATE_FILE_LIST_EVENT])
+const emit = defineEmits([UPDATE_MODEL_EVENT, UPDATE_FILE_LIST_EVENT, 'success'])
 
 const props = defineProps(proUploadProps as ProUploadProps)
 
@@ -146,6 +144,8 @@ const handleUploadSuccess = (
   ;(uploadFile as FileItem).id = id
 
   emit(UPDATE_MODEL_EVENT, getCurrentValue(uploadFiles as FileItem[]))
+
+  emit('success', uploadFile)
 }
 
 const handleUploadError = (error: Error) => {

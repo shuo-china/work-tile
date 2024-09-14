@@ -60,7 +60,9 @@ const handleSubmit = () => {
   formRef.value.validate(valid => {
     if (valid) {
       runAsync(formData).then(() => {
-        ElMessage.success('登录成功')
+        ElNotification.success({
+          title: '登录成功'
+        })
         router.push('/')
       })
     }

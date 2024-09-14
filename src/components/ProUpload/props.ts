@@ -19,6 +19,10 @@ export const proUploadProps = {
   },
   transform: {
     type: definePropType<(ids: number[]) => any>(Function)
+  },
+  showTip: {
+    type: Boolean,
+    default: true
   }
 } as const
 
