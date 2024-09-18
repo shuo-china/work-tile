@@ -19,25 +19,32 @@
         </el-tag>
       </TaskLevelPopover>
     </div>
-    <div class="flex-grow-1">
-      <div class="mb-2.5">参与人：</div>
-      <div class="flex gap-x-1.5">
-        <div v-for="item in data?.manager_member_arr" :key="item.id" class="group relative text-0">
-          <el-avatar :src="item.avatar_str" :size="32"></el-avatar>
+    <div class="flex-grow-1 text-0">
+      <div class="mb-2.5 text-sm">参与人：</div>
+      <MemberPickerPopover
+        :single="false"
+        :model-value="data?.manager_member_arr ? data.manager_member_arr : []"
+        placement="bottom-start"
+        @update:model-value="handleUpdateManagerMember"
+      >
+        <div class="inline-flex gap-x-1.5">
           <div
-            class="absolute right-0 top-0 hidden translate-x-1 cursor-pointer items-center justify-center rounded-full bg-[#cacaca] p-0.5 text-white group-hover:flex -translate-y-1 hover:bg-[var(--el-color-danger)]"
-            @click="deleteManagerMember(item)"
+            v-for="item in data?.manager_member_arr"
+            :key="item.id"
+            class="group relative text-0"
+            @click.stop
           >
-            <el-icon :size="12">
-              <CloseBold />
-            </el-icon>
+            <el-avatar :src="item.avatar_str" :size="32"></el-avatar>
+            <div
+              class="absolute right-0 top-0 hidden translate-x-1 cursor-pointer items-center justify-center rounded-full bg-[#cacaca] p-0.5 text-white group-hover:flex -translate-y-1 hover:bg-[var(--el-color-danger)]"
+              @click="deleteManagerMember(item)"
+            >
+              <el-icon :size="12">
+                <CloseBold />
+              </el-icon>
+            </div>
           </div>
-        </div>
-        <MemberPickerPopover
-          :single="false"
-          :model-value="data?.manager_member_arr ? data.manager_member_arr : []"
-          @update:model-value="handleUpdateManagerMember"
-        >
+
           <div
             class="group h-8 w-8 flex cursor-pointer items-center justify-center border-1 border-black/25 rounded-full border-dashed hover:border-[var(--el-color-primary)]"
           >
@@ -45,8 +52,8 @@
               ><User
             /></el-icon>
           </div>
-        </MemberPickerPopover>
-      </div>
+        </div>
+      </MemberPickerPopover>
     </div>
   </div>
   <div class="mb-2.5 mt-6 h-[30px] flex items-center justify-between">

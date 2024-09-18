@@ -1,3 +1,3 @@
-<template>
-  <div>1</div>
-</template>
+<template>工时</template>
+
+<script lang="ts" setup></script>

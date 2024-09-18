@@ -1,7 +1,11 @@
 <template>
   <el-dropdown>
     <div class="flex cursor-pointer items-center rounded p-2.5 outline-none hover:bg-black/3">
-      <el-avatar shape="circle" :size="28" src="/default_avatar.png"></el-avatar>
+      <el-avatar
+        shape="circle"
+        :size="28"
+        :src="userStore.userInfo?.avatar || '/default_avatar.png'"
+      ></el-avatar>
       <span class="pl-2 text-black/45">
         {{ userStore.userInfo?.name ? userStore.userInfo?.name : '' }}
       </span>

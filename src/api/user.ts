@@ -21,6 +21,7 @@ export interface UserInfoResponseData {
   base_info: {
     id: number
     name: string
+    full_path: string
   }
 }
 

@@ -15,6 +15,7 @@ export interface UserInfo {
   id: number
   name: string
   roles: string[]
+  avatar: string
 }
 
 export const useUserStore = defineStore(StoreId.User, () => {
@@ -33,11 +34,12 @@ export const useUserStore = defineStore(StoreId.User, () => {
 
   const getUserInfo = async () => {
     const {
-      base_info: { id, name }
+      base_info: { id, name, full_path }
     } = await getUserInfoApi()
     userInfo.value = {
       id,
       name,
+      avatar: full_path,
       roles: []
     }
   }
